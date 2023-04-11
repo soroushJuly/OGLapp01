@@ -1,26 +1,33 @@
 // OGLapp01.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
-
+#pragma once
 #include <iostream>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include "MoveLogic.cpp"
 
 using namespace std;
 
 // Window dimensions
 const GLint WIDTH = 800, HEIGHT = 600;
 
-GLuint VBO, VAO, shader;
+GLuint VBO, VAO, shader, uniformXMove;
+
+float triOffset = 0.0f;
+bool xDirection = true;
+
 
 // Vertex Shader
 // input of vector with 3 dimensions 
 // this will be the final positin in the shader
-static const char* vShader = "			\n\
-#version 330							\n\
-										\n\
-layout (location = 0) in vec3 pos;		\n\
-void main(){							\n\
-	gl_Position = vec4(0.4 * pos.x, 0.5 * pos.y, pos.z, 1.0);\n\
+static const char* vShader = "											\n\
+#version 330															\n\
+																		\n\
+uniform float xMove;													\n\
+																		\n\
+layout (location = 0) in vec3 pos;										\n\
+void main(){															\n\
+	gl_Position = vec4(0.4 * pos.x + xMove, 0.5 * pos.y, pos.z, 1.0);	\n\
 }";
 
 // Fragment shaders
@@ -102,6 +109,8 @@ void CompileShaders()
 		printf("Error validating the program: %s \n", eLog);
 		return;
 	}
+
+	uniformXMove = glGetUniformLocation(shader, "xMove");
 }
 
 void CreateTriangle()
@@ -185,11 +194,15 @@ int main()
 	CreateTriangle();
 	CompileShaders();
 
+	Movement xMovement;
+
 	// Loop until the window closed
 	while (!glfwWindowShouldClose(mainWindow))
 	{
 		// Get and handle user inputs
 		glfwPollEvents();
+
+		xMovement.move(xDirection, triOffset);
 
 		// Clear window
 		glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
@@ -197,6 +210,10 @@ int main()
 
 		// it will use the shader we compiled up there which is global
 		glUseProgram(shader);
+
+		// first uniform to appear
+		glUniform1f(uniformXMove, triOffset);
+
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 		glBindVertexArray(0);
@@ -212,7 +229,6 @@ int main()
 }
 
 // Tips for Getting Started: 
-//   2. Use the Team Explorer window to connect to source control
 //   3. Use the Output window to see build output and other messages
 //   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
 //   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
