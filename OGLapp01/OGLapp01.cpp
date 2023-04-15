@@ -225,6 +225,8 @@ int main()
 		// Should be initilized first 
 		glm::mat4 model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(triOffset, 0.0f, 0.0f));
+		// Rotate but disturb the triangle
+		model = glm::rotate(model, 45 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 
 		// using model matrix to translate the triangle || false is for disabling the transform
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
