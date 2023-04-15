@@ -15,6 +15,7 @@ using namespace std;
 
 // Window dimensions
 const GLint WIDTH = 800, HEIGHT = 600;
+const float toRadians = 3.14159265f / 180.0f;
 
 GLuint VBO, VAO, shader, uniformModel;
 
@@ -148,14 +149,14 @@ void CreateTriangle()
 
 }
 
-int main()
+int InitilizeGlfw() 
 {
 	// Initilize GLFW
 	if (!glfwInit())
 	{
 		cout << "Failed initilization!!";
 		glfwTerminate();
-		return 1;
+		return -1;
 	}
 
 	// Setting up GLFW
@@ -165,6 +166,11 @@ int main()
 	// detects old openGL codes, NO backwards compatibility
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+
+}
+int main()
+{
+	if (InitilizeGlfw() == -1) { return 1; };
 
 	GLFWwindow* mainWindow = glfwCreateWindow(WIDTH, HEIGHT, "The Window", nullptr, nullptr);
 
