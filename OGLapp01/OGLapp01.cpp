@@ -31,10 +31,15 @@ static const char* vShader = "											\n\
 																		\n\
 layout (location = 0) in vec3 pos;										\n\
 																		\n\
+out vec4 vCol;															\n\
+																		\n\
 uniform mat4 model;														\n\
-void main(void){															\n\
-	gl_Position = model * vec4(0.4 * pos.x, 0.5 * pos.y, pos.z, 1.0);	\n\
+void main(void){														\n\
+	gl_Position = model * vec4(pos, 1.0);								\n\
+	vCol = vec4(clamp(pos, 0.0f, 1.0f), 1.0f);							\n\
 }";
+
+//gl_Position = model * vec4(0.4 * pos.x, 0.5 * pos.y, pos.z, 1.0);	\n\
 
 // Fragment shaders
 static const char* fShader = "			\n\
@@ -42,9 +47,11 @@ static const char* fShader = "			\n\
 										\n\
 out vec4 colour;						\n\
 										\n\
+in vec4 vCol;							\n\
+										\n\
 void main()								\n\
 {										\n\
-	colour = vec4(0.0, 1.0, 0.0, 1.0);	\n\
+	colour = vCol;						\n\
 }";
 
 void AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType)
@@ -168,6 +175,7 @@ int InitilizeGlfw()
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 }
+
 int main()
 {
 	if (InitilizeGlfw() == -1) { return 1; };
@@ -216,7 +224,7 @@ int main()
 		xMovement.move(xDirection, triOffset);
 
 		// Clear window
-		glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		// it will use the shader we compiled up there which is global
@@ -224,11 +232,13 @@ int main()
 
 		// Should be initilized first 
 		glm::mat4 model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(triOffset, 0.0f, 0.0f));
+		//model = glm::translate(model, glm::vec3(triOffset, 0.0f, 0.0f));
 		// Rotate but disturb the triangle
-		model = glm::rotate(model, 45 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		//model = glm::rotate(model, 45 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		// Scale the triangle
+		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
 
-		// using model matrix to translate the triangle || false is for disabling the transform
+		// using model matrix to translate the tr.iangle || false is for disabling the transform
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
 		glBindVertexArray(VAO);
@@ -246,6 +256,5 @@ int main()
 }
 
 // Tips for Getting Started: 
-//   3. Use the Output window to see build output and other messages
 //   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
 //   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
