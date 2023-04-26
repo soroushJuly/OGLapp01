@@ -17,7 +17,7 @@ using namespace std;
 const GLint WIDTH = 800, HEIGHT = 600;
 const float toRadians = 3.14159265f / 180.0f;
 
-GLuint VBO, VAO, shader, uniformModel;
+GLuint VBO, VAO, IBO, shader, uniformModel, uniformProjection;
 
 float triOffset = 0.0f;
 bool xDirection = true;
@@ -34,8 +34,10 @@ layout (location = 0) in vec3 pos;										\n\
 out vec4 vCol;															\n\
 																		\n\
 uniform mat4 model;														\n\
+uniform mat4 projection;												\n\
+																		\n\
 void main(void){														\n\
-	gl_Position = model * vec4(pos, 1.0);								\n\
+	gl_Position = projection * model * vec4(pos, 1.0);								\n\
 	vCol = vec4(clamp(pos, 0.0f, 1.0f), 1.0f);							\n\
 }";
 
@@ -124,12 +126,22 @@ void CompileShaders()
 	}
 
 	uniformModel = glGetUniformLocation(shader, "model");
+	uniformProjection = glGetUniformLocation(shader, "projection");
 }
 
 void CreateTriangle()
 {
+	// 0 3 1 means that first draw the first vector in the vertices then last and then second
+	unsigned int indices[] = {
+		0, 3, 1,
+		1, 3, 2,
+		2, 3, 0,
+		0, 1, 2
+	};
+
 	GLfloat vertices[] = {
 		-1.0f,-1.0f, 0.0f,
+		0.0f,-1.0f, 1.0f,
 		1.0f,-1.0f,0.0f,
 		0.0f,1.0f,0.0f
 	};
@@ -139,9 +151,13 @@ void CreateTriangle()
 	// Binding it with an ID
 	glBindVertexArray(VAO);
 
-	// Generating VBO buffers
+	// Generating and binding IBO buffer
+	glGenBuffers(1, &IBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+	// 1.Generating VBO buffers 2.Binding it with an ID
 	glGenBuffers(1, &VBO);
-	// Binding it with an ID
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	// Filling it with actual data
 	// Static draw means we do not want to change it later
@@ -152,11 +168,13 @@ void CreateTriangle()
 
 	// Unbinding values
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
 	glBindVertexArray(0);
 
 }
 
-int InitilizeGlfw() 
+int InitilizeGlfw()
 {
 	// Initilize GLFW
 	if (!glfwInit())
@@ -207,11 +225,16 @@ int main()
 		return 1;
 	}
 
+	// to solve the problem of not showing blue color in front
+	glEnable(GL_DEPTH_TEST);
+
 	// Setup viewport size
 	glViewport(0, 0, bufferWidth, bufferHeight);
 
 	CreateTriangle();
 	CompileShaders();
+
+	glm::mat4 projection = glm::perspective(45.0f, (GLfloat)bufferWidth / (GLfloat)bufferHeight, 0.1f, 100.0f);
 
 	Movement xMovement;
 
@@ -225,24 +248,32 @@ int main()
 
 		// Clear window
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// it will use the shader we compiled up there which is global
 		glUseProgram(shader);
 
 		// Should be initilized first 
 		glm::mat4 model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.5f));
 		//model = glm::translate(model, glm::vec3(triOffset, 0.0f, 0.0f));
 		// Rotate but disturb the triangle
-		//model = glm::rotate(model, 45 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::rotate(model, triOffset * 360 * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		// Scale the triangle
 		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
 
 		// using model matrix to translate the tr.iangle || false is for disabling the transform
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		// DEPRECATED:
+		// glDrawArrays(GL_TRIANGLES, 0, 3);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+		// NEW: 
+		glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 
 		// Unbinding the program
