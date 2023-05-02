@@ -2,16 +2,24 @@
 //
 #pragma once
 #include <iostream>
+#include <string.h>
+#include <cmath>
+#include <vector>
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include "MoveLogic.cpp"
 
 // glm files
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "MoveLogic.cpp"
+#include "Window.h"
+
 using namespace std;
+
+Window mainWindow;
 
 // Window dimensions
 const GLint WIDTH = 800, HEIGHT = 600;
@@ -196,40 +204,44 @@ int InitilizeGlfw()
 
 int main()
 {
-	if (InitilizeGlfw() == -1) { return 1; };
+	//if (InitilizeGlfw() == -1) { return 1; };
 
-	GLFWwindow* mainWindow = glfwCreateWindow(WIDTH, HEIGHT, "The Window", nullptr, nullptr);
+	//GLFWwindow* mainWindow = glfwCreateWindow(WIDTH, HEIGHT, "The Window", nullptr, nullptr);
 
-	if (!mainWindow)
-	{
-		printf("failed to open the window");
-		glfwTerminate();
-		return 1;
-	}
+	//if (!mainWindow)
+	//{
+	//	printf("failed to open the window");
+	//	glfwTerminate();
+	//	return 1;
+	//}
 
-	// Get buffer size infos
-	int bufferWidth, bufferHeight;
-	glfwGetFramebufferSize(mainWindow, &bufferWidth, &bufferHeight);
+	//// Get buffer size infos
+	//int bufferWidth, bufferHeight;
+	//glfwGetFramebufferSize(mainWindow, &bufferWidth, &bufferHeight);
 
-	// Set context for GLEW to use
-	glfwMakeContextCurrent(mainWindow);
+	//// Set context for GLEW to use
+	//glfwMakeContextCurrent(mainWindow);
 
-	// Allow modern features of glew
-	glewExperimental = GL_TRUE;
+	//// Allow modern features of glew
+	//glewExperimental = GL_TRUE;
 
-	if (glewInit() != GLEW_OK)
-	{
-		printf("glew failed");
-		glfwDestroyWindow(mainWindow);
-		glfwTerminate();
-		return 1;
-	}
+	//if (glewInit() != GLEW_OK)
+	//{
+	//	printf("glew failed");
+	//	glfwDestroyWindow(mainWindow);
+	//	glfwTerminate();
+	//	return 1;
+	//}
 
-	// to solve the problem of not showing blue color in front
-	glEnable(GL_DEPTH_TEST);
+	//// to solve the problem of not showing blue color in front
+	//glEnable(GL_DEPTH_TEST);
 
-	// Setup viewport size
-	glViewport(0, 0, bufferWidth, bufferHeight);
+	//// Setup viewport size
+	//glViewport(0, 0, bufferWidth, bufferHeight);
+
+	mainWindow.Initialise();
+	GLint bufferWidth = mainWindow.getBufferWidth();
+	GLint bufferHeight = mainWindow.getBufferHeight();
 
 	CreateTriangle();
 	CompileShaders();
@@ -239,7 +251,7 @@ int main()
 	Movement xMovement;
 
 	// Loop until the window closed
-	while (!glfwWindowShouldClose(mainWindow))
+	while (!mainWindow.getShouldClose())
 	{
 		// Get and handle user inputs
 		glfwPollEvents();
@@ -279,11 +291,10 @@ int main()
 		// Unbinding the program
 		glUseProgram(0);
 
-		glfwSwapBuffers(mainWindow);
+		mainWindow.swapBuffer();
 	}
 
 	return 0;
-
 }
 
 // Tips for Getting Started: 

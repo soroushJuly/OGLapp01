@@ -142,6 +142,10 @@
     <ClCompile Include="main_deprecatedusinguniformvaluetoMove.cpp" />
     <ClCompile Include="MoveLogic.cpp" />
     <ClCompile Include="OGLapp01.cpp" />
+    <ClCompile Include="Window.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
