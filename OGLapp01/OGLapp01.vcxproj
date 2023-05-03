@@ -139,7 +139,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main_deprecatedusinguniformvaluetoMove.cpp" />
     <ClCompile Include="MoveLogic.cpp" />
     <ClCompile Include="OGLapp01.cpp" />
     <ClCompile Include="Window.cpp" />
